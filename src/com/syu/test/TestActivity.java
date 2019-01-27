@@ -16,6 +16,8 @@
 
 package com.syu.test;
 
+import com.syu.jni.JniI2c;
+import com.syu.jni.LsecIfly;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -44,14 +46,20 @@ import android.os.Environment;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.provider.Settings.System;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnTouchListener;
+import android.view.KeyEvent;
+import android.view.MotionEvent;
+import android.view.KeyCharacterMap;
+import android.view.InputDevice;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.TextView;
+import android.telephony.TelephonyManager;
+import android.hardware.input.InputManager;
 
 public class TestActivity extends Activity {
     private static final String TAG="TEST";
@@ -61,10 +69,30 @@ public class TestActivity extends Activity {
     boolean saving = false;
     Button logbt;
     SeekBar myBar;
+    private long mDownTime;
+    OnTouchListener ml;
     AudioManager mAudioManager;
     boolean hdmion = false;
     Button hdmi;
 
+   void sendEvent(int action, long when) {
+        final KeyEvent ev = new KeyEvent(mDownTime, when, action, KeyEvent.KEYCODE_BACK, 0,
+                0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
+                KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
+                InputDevice.SOURCE_KEYBOARD);
+        InputManager.getInstance().injectInputEvent(ev,
+                InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
+    }
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        Log.i(TAG,"keyCode down "+keyCode+" event "+event);
+        return super.onKeyDown(keyCode,event);
+    }
+
+    public boolean onKeyUp(int keyCode, KeyEvent event){
+        Log.i(TAG,"keyCode up"+keyCode+" event "+event);
+        return super.onKeyUp(keyCode,event);
+    }
+        
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -72,6 +100,25 @@ public class TestActivity extends Activity {
 	//write2sd();
 	//finish();
 	mContext = this;
+
+
+        ml = new OnTouchListener(){
+            public boolean onTouch(View v, MotionEvent event){
+                 final int action = event.getAction();
+               switch (action) {
+                    case MotionEvent.ACTION_DOWN:
+                        mDownTime = SystemClock.uptimeMillis();
+                        sendEvent(KeyEvent.ACTION_DOWN, mDownTime);
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        sendEvent(KeyEvent.ACTION_UP, mDownTime/*SystemClock.uptimeMillis()*/);
+                        break;
+                }
+                return true;
+            }
+
+        };
+
         setContentView(R.layout.activity_main);
 	final Button button1 = (Button) findViewById(R.id.button1);
 	button1.setOnClickListener(mListener);	
@@ -181,13 +228,13 @@ public class TestActivity extends Activity {
 			break;
 		case R.id.button3:
                 //type= AudioManager.STREAM_ALARM;
-                //    startMapPip();
+                    startMapPip();
 			break;
 		case R.id.button4:
                     //type= AudioManager.STREAM_SYSTEM;
                     //makecall();
-                    //removePip();
-		    sendBroadcast();
+                    removePip();
+		    //sendBroadcast();
 			break;
                 case R.id.button5:
                         if(saving) {
@@ -312,7 +359,9 @@ public class TestActivity extends Activity {
     void startMapPip(){
         SystemProperties.set("sys.lsec.force_pip","true");
         Intent intent = new Intent();
-        ComponentName cn = new ComponentName("com.autonavi.amapauto","com.autonavi.auto.remote.fill.UsbFillActivity"); 
+        //ComponentName cn = new ComponentName("com.autonavi.amapauto","com.autonavi.auto.remote.fill.UsbFillActivity"); 
+        ComponentName cn = new ComponentName("ru.yandex.yandexnavi","ru.yandex.yandexnavi.core.NavigatorActivity"); 
+
         intent.setComponent(cn);
         intent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP|Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.putExtra("force_pip",true);
@@ -339,5 +388,10 @@ public class TestActivity extends Activity {
         IntentFilter filter = new IntentFilter();
         filter.addAction("com.test.test.abcde");
         mContext.registerReceiver(receiver, filter);
+    }
+    public void click(){
+        //new JniI2c().testJni();
+        LsecIfly ifly = new LsecIfly();
+	Log.i(TAG,"ifly versioin:"+ifly.getVer());//+" mode:"+ifly.getMicMode()+" func:"+ifly.getMicFunc());
     }
 }
