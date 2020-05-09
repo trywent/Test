@@ -4,9 +4,9 @@ import android.util.Log;
 public class JniI2c{
 	private native int open(String path);
 	private native int readRk(int addr,int reg);
-	static{
+	/*static{
         java.lang.System.loadLibrary("jni_i2c");
-	}
+	}*/
 
 	public void testJni(){
 		Log.i("FYTTEST","test jni");

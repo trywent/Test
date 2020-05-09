@@ -3,7 +3,9 @@ LOCAL_PATH := $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-    test.cpp
+    test.cpp\
+    curl_test.cpp
+
 LOCAL_C_INCLUDES += \
     $(JNI_H_INCLUDE) \
 
@@ -13,6 +15,7 @@ LOCAL_SHARED_LIBRARIES := \
     libcutils \
     libutils \
     liblog \
+    libcurl
 #LOCAL_CFLAGS += -O0 -g
 
 LOCAL_MODULE := libtest_jni

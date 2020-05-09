@@ -16,8 +16,8 @@
 
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-		package="com.syu.test"
-		android:sharedUserId="android.uid.system">
+		android:sharedUserId="android.uid.system"
+		package="com.syu.test">
 <!--android:sharedUserId="android.uid.system"-->
     <protected-broadcast android:name="com.test.test.abcde"/>
     <protected-broadcast android:name="com.test.test.abcd"/>
@@ -35,7 +35,11 @@
 				<category android:name="android.intent.category.LAUNCHER" />
 			</intent-filter>
 		</activity>
-
+		<activity android:name="PlatLogoActivityQ">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN" />
+			</intent-filter>
+		</activity>
 	<!--receiver android:name="">
             <intent-filter>
 		<action android:name= />

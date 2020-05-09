@@ -26,9 +26,12 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import com.syu.jni.JniI2c;
-
+import com.syu.jni.TouchNative;
+import com.syu.jni.SyuJniNative;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.Dialog;
+import android.app.AlertDialog;
 import static android.app.ActivityManager.StackId.PINNED_STACK_ID;
 import android.app.IActivityManager;
 import android.content.ComponentName;
@@ -44,6 +47,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.provider.Settings.System;
 import android.util.Log;
@@ -151,14 +155,17 @@ public class TestActivity extends Activity {
         TextView tv = (TextView)findViewById(R.id.textView1);
         tv.setTypeface(null,2);
         registerReceiver();
-
-        Log.i(TAG,"deviceID:"+((TelephonyManager)mContext.getSystemService(TELEPHONY_SERVICE)).getDeviceId());
+	int density = SystemProperties.getInt("ro.sf.lcd_density",0);
+	tv.setText(Integer.toString(density).subSequence(0,3));
+        //Log.i(TAG,"deviceID:"+((TelephonyManager)mContext.getSystemService(TELEPHONY_SERVICE)).getDeviceId());
 	//(new MyAudio()).start();
 	//finish();
 	//new JniI2c().testJni();
         mAudioManager = (AudioManager)this.getSystemService(Context.AUDIO_SERVICE);
 	Log.i(TAG,"onCreate extra "+getIntent().getStringExtra("test")+ " boolen: force "+getIntent().getBooleanExtra("force_pip",false));
-
+	//Log.i(TAG,"ret:"+TouchNative.native_get_control(0));
+	SyuJniNative sjn = SyuJniNative.getInstance();
+	//TouchNative tn = new TouchNative();
     }
     protected void onNewIntent(Intent intent) {
 	super.onNewIntent(intent);
@@ -222,7 +229,8 @@ public class TestActivity extends Activity {
         public void onClick(View v) {
 		int type=0;
 		switch(v.getId()){
-		case R.id.button1:type= AudioManager.STREAM_VOICE_CALL;
+                case R.id.button1://type= AudioManager.STREAM_VOICE_CALL;
+                    showDialog(mContext);
 			break;
 		case R.id.button2:type= AudioManager.STREAM_NOTIFICATION;
 			break;
@@ -249,9 +257,11 @@ public class TestActivity extends Activity {
                             //runSave();
                         }
 			break;  
-                case R.id.button6:clearLogcat();
+                case R.id.button6:
+		    startLogo();
+		    //clearLogcat();
 		    break;
-                case R.id.button7:saveDmesg();
+                case R.id.button7:loopCurl();//startLogo1();//saveDmesg();
                     break;
                 case R.id.button8:
                     if(hdmion) {
@@ -370,7 +380,8 @@ public class TestActivity extends Activity {
     void removePip(){
         IActivityManager mActivityManager = ActivityManager.getService();
         try{
-            mActivityManager.removeStack(PINNED_STACK_ID);
+            mActivityManager.setPinnedStackVisible(false);
+            //mActivityManager.removeStack(PINNED_STACK_ID);
         }catch (RemoteException e){
             Log.i(TAG,"err",e);
         }
@@ -394,4 +405,33 @@ public class TestActivity extends Activity {
         LsecIfly ifly = new LsecIfly();
 	Log.i(TAG,"ifly versioin:"+ifly.getVer());//+" mode:"+ifly.getMicMode()+" func:"+ifly.getMicFunc());
     }
+
+    void showDialog(Context context){
+        AlertDialog d = new AlertDialog.Builder(context).setMessage("sjdlfjsdlfdkjk").create();
+        d.getWindow().setType(2008);
+        d.show();
+    }
+    void startLogo(){
+	final Intent intent = new Intent(Intent.ACTION_MAIN)
+                    .setClassName("android", "com.android.internal.app.PlatLogoActivityQ");
+            try {
+                mContext.startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to start activity " + intent.toString());
+            }
+	}
+    void startLogo1(){
+	final Intent intent = new Intent(Intent.ACTION_MAIN)
+                    .setClassName("com.syu.test", "com.syu.test.PlatLogoActivityQ");
+            try {
+                mContext.startActivity(intent);
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to start activity " + intent.toString());
+            }
+	}
+	private native int stopLoopCurl();
+	private native int loopCurl();
+	/*static{
+        java.lang.System.loadLibrary("test_jni");
+	}*/
 }

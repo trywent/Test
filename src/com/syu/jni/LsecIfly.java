@@ -26,9 +26,9 @@ public class LsecIfly{
         private native int getMode();
         private native int getVersion();
 
-	static{
+	/*static{
         java.lang.System.loadLibrary("lsec_ifly");
-	}
+	}*/
         /*return、command[0]
                         - 2  二版（仅降噪）
                         - 3  三版（带唤醒、回声消除）

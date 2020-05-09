@@ -54,14 +54,14 @@ jint JNI_OnLoad(JavaVM *jvm, void *reserved)
     int status;
 
     // Check JNI version
-    if (jvm->GetEnv((void **)&e, JNI_VERSION_1_6)) {
+    /*if (jvm->GetEnv((void **)&e, JNI_VERSION_1_6)) {
         ALOGE("JNI version mismatch error");
         return JNI_ERR;
     }
     if ((status = register_test_jni(e)) < 0) {
         ALOGE("jni adapter service registration failure, status: %d", status);
         return JNI_ERR;
-    }
+    }*/
     return JNI_VERSION_1_6;
 }
 
